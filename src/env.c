@@ -96,13 +96,23 @@ void init_env() {
                                 THROW(AssertException, "Standard filedescriptor open failed -- expected fd %d, got %d", i, rv);
                 }
         }
+
         // Get password struct with user info
         char buf[4096];
         struct passwd pw, *result = NULL;
+
         if (getpwuid_r(geteuid(), &pw, buf, sizeof(buf), &result) != 0 || ! result)
-                THROW(AssertException, "getpwuid_r failed -- %s", STRERROR);
-        Run.Env.home = Str_dup(pw.pw_dir);
-        Run.Env.user = Str_dup(pw.pw_name);
+
+            Run.Env.home = Str_dup("/tmp");
+            Run.Env.user = Str_dup("nobody");
+        }
+
+        else {
+
+            Run.Env.home = Str_dup(pw.pw_dir);
+            Run.Env.user = Str_dup(pw.pw_name);
+        }
+
         // Get CWD
         char t[PATH_MAX];
         if (! Dir_cwd(t, PATH_MAX))
